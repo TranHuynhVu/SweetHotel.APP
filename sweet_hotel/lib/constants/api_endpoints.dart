@@ -1,7 +1,13 @@
 class ApiEndpoints {
   // Base URL
+  // Production
   static const String baseUrl = 'https://api.sweethotel.kodopo.tech/api';
 
+  // Development - Android Emulator (thay PORT bằng port API của bạn)
+  //static const String baseUrl = 'http://10.0.2.2:5000/api';
+
+  // Development - iOS Simulator hoặc thiết bị thật (uncomment và thay IP)
+  //static const String baseUrl = 'http://192.168.1.xxx:5000/api';
   // Auth endpoints - trả về URL đầy đủ
   static const auth = _Auth();
 
@@ -10,6 +16,9 @@ class ApiEndpoints {
 
   // Room endpoints - trả về URL đầy đủ
   static const room = _Room();
+
+  // Booking endpoints - trả về URL đầy đủ
+  static const booking = _Booking();
 }
 
 // Auth endpoints
@@ -35,4 +44,13 @@ class _Room {
   String byId(String id) => '${ApiEndpoints.baseUrl}/Rooms/$id';
   String get availableByDateRange =>
       '${ApiEndpoints.baseUrl}/Rooms/AvailableByDateRange';
+}
+
+// Booking endpoints
+class _Booking {
+  const _Booking();
+  String get create => '${ApiEndpoints.baseUrl}/Bookings';
+  String get all => '${ApiEndpoints.baseUrl}/Bookings';
+  String byId(String id) => '${ApiEndpoints.baseUrl}/Bookings/$id';
+  String get myBookings => '${ApiEndpoints.baseUrl}/Bookings/MyBookings';
 }

@@ -6,6 +6,7 @@ class Room {
   final double discount;
   final String categoryId;
   final String categoryName;
+  final RoomCategory? category; // Thêm category object đầy đủ
   final List<RoomImage> images;
 
   Room({
@@ -16,6 +17,7 @@ class Room {
     required this.discount,
     required this.categoryId,
     required this.categoryName,
+    this.category,
     required this.images,
   });
 
@@ -27,7 +29,10 @@ class Room {
       price: (json['price'] ?? 0).toDouble(),
       discount: (json['discount'] ?? 0).toDouble(),
       categoryId: json['categoryId'] ?? '',
-      categoryName: json['categoryName'] ?? '',
+      categoryName: json['categoryName'] ?? (json['category']?['name'] ?? ''),
+      category: json['category'] != null
+          ? RoomCategory.fromJson(json['category'])
+          : null,
       images:
           (json['images'] as List<dynamic>?)
               ?.map((img) => RoomImage.fromJson(img))
@@ -45,6 +50,7 @@ class Room {
       'discount': discount,
       'categoryId': categoryId,
       'categoryName': categoryName,
+      'category': category?.toJson(),
       'images': images.map((img) => img.toJson()).toList(),
     };
   }
@@ -72,5 +78,38 @@ class RoomImage {
 
   Map<String, dynamic> toJson() {
     return {'id': id, 'path': path};
+  }
+}
+
+// Category trong Room Detail response
+class RoomCategory {
+  final String id;
+  final String name;
+  final String description;
+  final int maxPeople;
+
+  RoomCategory({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.maxPeople,
+  });
+
+  factory RoomCategory.fromJson(Map<String, dynamic> json) {
+    return RoomCategory(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      maxPeople: json['maxPeople'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'maxPeople': maxPeople,
+    };
   }
 }

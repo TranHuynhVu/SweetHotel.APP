@@ -6,6 +6,7 @@ import '../constants/api_endpoints.dart';
 import '../models/register.dart';
 import '../models/login.dart';
 import '../services/local_storage.dart';
+import '../utils/jwt_helper.dart';
 
 class AuthService {
   // Timeout để tránh chờ quá lâu
@@ -60,6 +61,12 @@ class AuthService {
           expiresIn: loginResponse.expiresIn,
         );
 
+        // Lấy và lưu User ID từ token
+        final userId = JwtHelper.getUserIdFromToken(loginResponse.accessToken);
+        if (userId != null) {
+          await _localStorage.saveUserId(userId);
+        }
+
         return loginResponse;
       } else {
         final error = jsonDecode(response.body);
@@ -89,5 +96,10 @@ class AuthService {
   // Get access token
   Future<String?> getAccessToken() async {
     return await _localStorage.getAccessToken();
+  }
+
+  // Get user ID
+  Future<String?> getUserId() async {
+    return await _localStorage.getUserId();
   }
 }

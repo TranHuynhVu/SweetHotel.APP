@@ -6,6 +6,7 @@ import '../services/room_service.dart';
 import '../services/category_service.dart';
 import '../constants/app_colors.dart';
 import '../widgets/custom_bottom_nav.dart';
+import '../routes/app_routes.dart';
 
 class RoomsScreen extends StatefulWidget {
   const RoomsScreen({Key? key}) : super(key: key);
@@ -641,9 +642,17 @@ class _RoomsScreenState extends State<RoomsScreen> {
         ],
       ),
       child: InkWell(
+        // Khi user click vào card này, sẽ chuyển sang màn hình Room Detail
+        // và truyền room.id làm tham số
         onTap: () {
-          // TODO: Navigate to room detail
+          // Navigate to room detail screen
+          Navigator.pushNamed(
+            context,
+            AppRoutes.roomDetail,
+            arguments: room.id,
+          );
         },
+        // ============================================
         borderRadius: BorderRadius.circular(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -903,7 +912,12 @@ class _RoomsScreenState extends State<RoomsScreen> {
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () {
-                              // TODO: Navigate to booking
+                              // Navigate to booking screen with pre-selected room
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.booking,
+                                arguments: room.id,
+                              );
                             },
                             borderRadius: BorderRadius.circular(12),
                             child: const Padding(

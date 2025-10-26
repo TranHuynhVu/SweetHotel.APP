@@ -59,6 +59,7 @@ class LocalStorage {
   static const String _refreshTokenKey = 'refresh_token';
   static const String _tokenTypeKey = 'token_type';
   static const String _expiresInKey = 'expires_in';
+  static const String _userIdKey = 'user_id';
 
   Future<bool> saveToken({
     required String accessToken,
@@ -82,11 +83,16 @@ class LocalStorage {
   Future<String?> getRefreshToken() => getString(_refreshTokenKey);
   Future<String?> getTokenType() => getString(_tokenTypeKey);
 
+  // User ID management
+  Future<bool> saveUserId(String userId) => saveString(_userIdKey, userId);
+  Future<String?> getUserId() => getString(_userIdKey);
+
   Future<bool> clearToken() async {
     await remove(_accessTokenKey);
     await remove(_refreshTokenKey);
     await remove(_tokenTypeKey);
     await remove(_expiresInKey);
+    await remove(_userIdKey);
     return true;
   }
 

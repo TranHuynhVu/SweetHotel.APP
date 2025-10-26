@@ -3,6 +3,8 @@ import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/register_screen.dart';
 import '../screens/rooms_screen.dart';
+import '../screens/room_detail_screen.dart';
+import '../screens/booking_screen.dart';
 
 class AppRoutes {
   // Tên các route
@@ -10,6 +12,8 @@ class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String rooms = '/rooms';
+  static const String roomDetail = '/room-detail';
+  static const String booking = '/booking';
 
   // Map các route với màn hình tương ứng
   static Map<String, WidgetBuilder> getRoutes() {
@@ -19,6 +23,28 @@ class AppRoutes {
       register: (context) => const RegisterScreen(),
       rooms: (context) => const RoomsScreen(),
     };
+  }
+
+  // Route generator để xử lý routes có parameters
+  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case roomDetail:
+        final roomId = settings.arguments as String?;
+        if (roomId == null) {
+          return null;
+        }
+        return MaterialPageRoute(
+          builder: (context) => RoomDetailScreen(roomId: roomId),
+        );
+      case booking:
+        final preSelectedRoomId = settings.arguments as String?;
+        return MaterialPageRoute(
+          builder: (context) =>
+              BookingScreen(preSelectedRoomId: preSelectedRoomId),
+        );
+      default:
+        return null;
+    }
   }
 
   // Route ban đầu khi khởi động app
