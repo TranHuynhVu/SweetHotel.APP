@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../widgets/custom_bottom_nav.dart';
 import '../services/room_service.dart';
 import '../models/room.dart';
@@ -520,18 +521,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   if (room.discount > 0)
                                     Text(
-                                      '\$${room.price.toStringAsFixed(0)}',
+                                      '${NumberFormat('#,###').format(room.price)} đ',
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         color: Colors.grey[500],
                                         decoration: TextDecoration.lineThrough,
+                                        decorationThickness: 2,
                                       ),
                                     ),
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
                                       Text(
-                                        '\$${room.finalPrice.toStringAsFixed(0)}',
+                                        NumberFormat(
+                                          '#,###',
+                                        ).format(room.finalPrice),
                                         style: const TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.w800,
@@ -549,10 +553,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                           bottom: 2,
                                         ),
                                         child: Text(
-                                          '/ night',
+                                          'đ/đêm',
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Colors.grey[600],
+                                            fontWeight: FontWeight.w500,
                                           ),
                                         ),
                                       ),

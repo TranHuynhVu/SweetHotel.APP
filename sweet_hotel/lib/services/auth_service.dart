@@ -16,7 +16,7 @@ class AuthService {
     try {
       final response = await http
           .post(
-            Uri.parse(ApiEndpoints.register),
+            Uri.parse(ApiEndpoints.auth.register),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode(request.toJson()),
           )
@@ -43,7 +43,7 @@ class AuthService {
     try {
       final response = await http
           .post(
-            Uri.parse(ApiEndpoints.login),
+            Uri.parse(ApiEndpoints.auth.login),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode(request.toJson()),
           )

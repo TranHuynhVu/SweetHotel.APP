@@ -1,5 +1,4 @@
 import 'dart:convert';
-import '../constants/api_endpoints.dart';
 import 'http_interceptor.dart';
 
 class ApiService {
@@ -11,15 +10,11 @@ class ApiService {
   final _interceptor = HttpInterceptor();
 
   // GET request với auto refresh token
-  Future<dynamic> get(String endpoint) async {
+  Future<dynamic> get(String url) async {
     try {
-      final url = Uri.parse(
-        endpoint.startsWith('http')
-            ? endpoint
-            : '${ApiEndpoints.baseUrl}$endpoint',
-      );
+      final uri = Uri.parse(url);
 
-      final response = await _interceptor.request(method: 'GET', url: url);
+      final response = await _interceptor.request(method: 'GET', url: uri);
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
@@ -33,20 +28,13 @@ class ApiService {
     }
   }
 
-  Future<dynamic> getAvailable(
-    String endpoint,
-    Map<String, dynamic> data,
-  ) async {
+  Future<dynamic> getAvailable(String url, Map<String, dynamic> data) async {
     try {
-      final url = Uri.parse(
-        endpoint.startsWith('http')
-            ? endpoint
-            : '${ApiEndpoints.baseUrl}$endpoint',
-      );
+      final uri = Uri.parse(url);
 
       final response = await _interceptor.request(
         method: 'GET',
-        url: url,
+        url: uri,
         body: json.encode(data),
       );
 
@@ -63,17 +51,13 @@ class ApiService {
   }
 
   // POST request với auto refresh token
-  Future<dynamic> post(String endpoint, Map<String, dynamic> data) async {
+  Future<dynamic> post(String url, Map<String, dynamic> data) async {
     try {
-      final url = Uri.parse(
-        endpoint.startsWith('http')
-            ? endpoint
-            : '${ApiEndpoints.baseUrl}$endpoint',
-      );
+      final uri = Uri.parse(url);
 
       final response = await _interceptor.request(
         method: 'POST',
-        url: url,
+        url: uri,
         body: json.encode(data),
       );
 
@@ -90,17 +74,13 @@ class ApiService {
   }
 
   // PUT request với auto refresh token
-  Future<dynamic> put(String endpoint, Map<String, dynamic> data) async {
+  Future<dynamic> put(String url, Map<String, dynamic> data) async {
     try {
-      final url = Uri.parse(
-        endpoint.startsWith('http')
-            ? endpoint
-            : '${ApiEndpoints.baseUrl}$endpoint',
-      );
+      final uri = Uri.parse(url);
 
       final response = await _interceptor.request(
         method: 'PUT',
-        url: url,
+        url: uri,
         body: json.encode(data),
       );
 
@@ -117,15 +97,11 @@ class ApiService {
   }
 
   // DELETE request với auto refresh token
-  Future<dynamic> delete(String endpoint) async {
+  Future<dynamic> delete(String url) async {
     try {
-      final url = Uri.parse(
-        endpoint.startsWith('http')
-            ? endpoint
-            : '${ApiEndpoints.baseUrl}$endpoint',
-      );
+      final uri = Uri.parse(url);
 
-      final response = await _interceptor.request(method: 'DELETE', url: url);
+      final response = await _interceptor.request(method: 'DELETE', url: uri);
 
       if (response.statusCode == 200) {
         return json.decode(response.body);

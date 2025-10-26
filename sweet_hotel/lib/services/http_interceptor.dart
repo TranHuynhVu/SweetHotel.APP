@@ -46,7 +46,7 @@ class HttpInterceptor {
       }
 
       final response = await http.post(
-        Uri.parse(ApiEndpoints.refreshToken),
+        Uri.parse(ApiEndpoints.auth.refreshToken),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'refresh_token': refreshToken}),
       );

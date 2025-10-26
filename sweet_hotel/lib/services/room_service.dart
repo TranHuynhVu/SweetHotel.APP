@@ -1,5 +1,6 @@
 import '../services/api_service.dart';
 import '../models/room.dart';
+import '../constants/api_endpoints.dart';
 
 class RoomService {
   final _apiService = ApiService();
@@ -7,7 +8,7 @@ class RoomService {
   /// Lấy danh sách tất cả phòng
   Future<List<Room>> getAllRooms() async {
     try {
-      final response = await _apiService.get('/Rooms');
+      final response = await _apiService.get(ApiEndpoints.room.all);
 
       if (response is List) {
         return response.map((json) => Room.fromJson(json)).toList();
@@ -22,7 +23,7 @@ class RoomService {
   /// Lấy chi tiết một phòng
   Future<Room> getRoomById(String id) async {
     try {
-      final response = await _apiService.get('/Rooms/$id');
+      final response = await _apiService.get(ApiEndpoints.room.byId(id));
       return Room.fromJson(response);
     } catch (e) {
       throw Exception('Failed to load room details: $e');
@@ -76,7 +77,7 @@ class RoomService {
 
       final queryString = queryParams.join('&');
       final response = await _apiService.get(
-        '/Rooms/AvailableByDateRange?$queryString',
+        '${ApiEndpoints.room.availableByDateRange}?$queryString',
       );
 
       if (response is List) {

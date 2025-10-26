@@ -1,19 +1,38 @@
 class ApiEndpoints {
-  // Base URL cho Android Emulator dùng 10.0.2.2 thay vì localhost
-  static const String baseUrl = 'https://10.0.2.2:7066/api';
+  // Base URL
+  static const String baseUrl = 'https://api.sweethotel.kodopo.tech/api';
 
-  // Auth endpoints
-  static const String login = '$baseUrl/Auth/Login';
-  static const String register = '$baseUrl/Auth/Register';
-  static const String logout = '$baseUrl/Auth/Logout';
-  static const String refreshToken = '$baseUrl/Auth/RefreshToken';
+  // Auth endpoints - trả về URL đầy đủ
+  static const auth = _Auth();
 
-  // User endpoints
-  static const String userProfile = '$baseUrl/User/Profile';
-  static const String updateProfile = '$baseUrl/User/Update';
-  static const String changePassword = '$baseUrl/User/ChangePassword';
+  // Category endpoints - trả về URL đầy đủ
+  static const category = _Category();
 
-  // Room endpoints
-  static const String rooms = '$baseUrl/Rooms';
-  static String roomDetail(String id) => '$baseUrl/Rooms/$id';
+  // Room endpoints - trả về URL đầy đủ
+  static const room = _Room();
+}
+
+// Auth endpoints
+class _Auth {
+  const _Auth();
+  String get login => '${ApiEndpoints.baseUrl}/Auth/Login';
+  String get register => '${ApiEndpoints.baseUrl}/Auth/Register';
+  String get logout => '${ApiEndpoints.baseUrl}/Auth/Logout';
+  String get refreshToken => '${ApiEndpoints.baseUrl}/Auth/RefreshToken';
+}
+
+// Category endpoints
+class _Category {
+  const _Category();
+  String get all => '${ApiEndpoints.baseUrl}/Categories';
+  String byId(String id) => '${ApiEndpoints.baseUrl}/Categories/$id';
+}
+
+// Room endpoints
+class _Room {
+  const _Room();
+  String get all => '${ApiEndpoints.baseUrl}/Rooms';
+  String byId(String id) => '${ApiEndpoints.baseUrl}/Rooms/$id';
+  String get availableByDateRange =>
+      '${ApiEndpoints.baseUrl}/Rooms/AvailableByDateRange';
 }

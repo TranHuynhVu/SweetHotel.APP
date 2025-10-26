@@ -864,7 +864,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                                   style: const TextStyle(
                                     fontSize: 26,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
+                                    color: Color.fromARGB(255, 255, 77, 77),
                                   ),
                                 ),
                                 const SizedBox(width: 4),
