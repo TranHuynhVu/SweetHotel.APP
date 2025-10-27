@@ -571,10 +571,10 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
               child: ElevatedButton(
                 onPressed: room.isAvailable
                     ? () {
-                        // Navigate to booking screen with pre-selected room
+                        // Navigate to create booking screen with pre-selected room
                         Navigator.pushNamed(
                           context,
-                          '/booking',
+                          '/create-booking',
                           arguments: room.id,
                         );
                       }

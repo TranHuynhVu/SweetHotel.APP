@@ -1,9 +1,11 @@
 import '../services/api_service.dart';
 import '../models/booking.dart';
 import '../constants/api_endpoints.dart';
+import '../services/auth_service.dart';
 
 class BookingService {
   final _apiService = ApiService();
+  final _authService = AuthService();
 
   /// Tạo booking mới
   Future<Booking> createBooking(CreateBookingRequest request) async {
@@ -22,7 +24,15 @@ class BookingService {
   /// Lấy danh sách tất cả bookings của user hiện tại
   Future<List<Booking>> getMyBookings() async {
     try {
-      final response = await _apiService.get(ApiEndpoints.booking.myBookings);
+      // Lấy userId từ AuthService
+      final userId = await _authService.getUserId();
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
+      final response = await _apiService.get(
+        ApiEndpoints.booking.myBookings(userId),
+      );
 
       if (response is List) {
         return response.map((json) => Booking.fromJson(json)).toList();

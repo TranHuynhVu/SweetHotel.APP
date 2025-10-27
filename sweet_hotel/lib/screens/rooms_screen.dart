@@ -196,10 +196,11 @@ class _RoomsScreenState extends State<RoomsScreen> {
           // Handle navigation
           switch (index) {
             case 0:
-              Navigator.pushNamed(context, '/home');
+              Navigator.pushReplacementNamed(context, '/home');
               break;
             case 1:
-              // Navigate to Bookings
+              // Navigate to Bookings - không truyền arguments
+              Navigator.pushNamed(context, '/booking');
               break;
             case 2:
               // Already on Rooms screen
@@ -913,11 +914,25 @@ class _RoomsScreenState extends State<RoomsScreen> {
                           child: InkWell(
                             onTap: () {
                               // Navigate to booking screen with pre-selected room
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.booking,
-                                arguments: room.id,
-                              );
+                              // Nếu đã chọn ngày, truyền cả ngày đến và ngày đi
+                              if (_startDate != null && _endDate != null) {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.createBooking,
+                                  arguments: {
+                                    'roomId': room.id,
+                                    'startDate': _startDate,
+                                    'endDate': _endDate,
+                                  },
+                                );
+                              } else {
+                                // Chỉ truyền roomId, user tự chọn ngày
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.createBooking,
+                                  arguments: room.id,
+                                );
+                              }
                             },
                             borderRadius: BorderRadius.circular(12),
                             child: const Padding(

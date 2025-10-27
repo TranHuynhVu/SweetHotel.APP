@@ -5,6 +5,7 @@ import '../screens/register_screen.dart';
 import '../screens/rooms_screen.dart';
 import '../screens/room_detail_screen.dart';
 import '../screens/booking_screen.dart';
+import '../screens/create_booking_screen.dart';
 
 class AppRoutes {
   // Tên các route
@@ -14,6 +15,7 @@ class AppRoutes {
   static const String rooms = '/rooms';
   static const String roomDetail = '/room-detail';
   static const String booking = '/booking';
+  static const String createBooking = '/create-booking';
 
   // Map các route với màn hình tương ứng
   static Map<String, WidgetBuilder> getRoutes() {
@@ -37,10 +39,31 @@ class AppRoutes {
           builder: (context) => RoomDetailScreen(roomId: roomId),
         );
       case booking:
-        final preSelectedRoomId = settings.arguments as String?;
+        // Không nhận arguments, chỉ hiển thị danh sách bookings
+        return MaterialPageRoute(builder: (context) => const BookingScreen());
+      case createBooking:
+        // Xử lý arguments: có thể là String (roomId) hoặc Map (roomId + dates)
+        final arguments = settings.arguments;
+
+        if (arguments is String) {
+          // Chỉ có roomId
+          return MaterialPageRoute(
+            builder: (context) =>
+                CreateBookingScreen(preSelectedRoomId: arguments),
+          );
+        } else if (arguments is Map<String, dynamic>) {
+          // Có cả roomId và dates
+          return MaterialPageRoute(
+            builder: (context) => CreateBookingScreen(
+              preSelectedRoomId: arguments['roomId'] as String?,
+              preSelectedStartDate: arguments['startDate'] as DateTime?,
+              preSelectedEndDate: arguments['endDate'] as DateTime?,
+            ),
+          );
+        }
+        // Không có arguments
         return MaterialPageRoute(
-          builder: (context) =>
-              BookingScreen(preSelectedRoomId: preSelectedRoomId),
+          builder: (context) => const CreateBookingScreen(),
         );
       default:
         return null;

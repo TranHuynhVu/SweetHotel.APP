@@ -52,5 +52,6 @@ class _Booking {
   String get create => '${ApiEndpoints.baseUrl}/Bookings';
   String get all => '${ApiEndpoints.baseUrl}/Bookings';
   String byId(String id) => '${ApiEndpoints.baseUrl}/Bookings/$id';
-  String get myBookings => '${ApiEndpoints.baseUrl}/Bookings/MyBookings';
+  String myBookings(String userId) =>
+      '${ApiEndpoints.baseUrl}/Bookings/MyBookings/$userId';
 }

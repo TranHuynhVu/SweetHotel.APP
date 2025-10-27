@@ -147,6 +147,10 @@ class _HomeScreenState extends State<HomeScreen> {
               radius: 16,
               backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=5'),
             ),
+            offset: const Offset(
+              0,
+              50,
+            ), // Đẩy menu xuống dưới để không che avatar
             onSelected: (value) {
               if (value == 'logout') {
                 _showLogoutDialog();
