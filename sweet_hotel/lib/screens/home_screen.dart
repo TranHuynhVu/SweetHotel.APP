@@ -4,6 +4,7 @@ import '../widgets/custom_bottom_nav.dart';
 import '../services/room_service.dart';
 import '../services/auth_service.dart';
 import '../models/room.dart';
+import '../routes/app_routes.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -146,9 +147,8 @@ class _HomeScreenState extends State<HomeScreen> {
           PopupMenuButton<String>(
             icon: const CircleAvatar(
               radius: 16,
-              backgroundImage: NetworkImage(
-                'https://www.google.com.vn/url?sa=i&url=https%3A%2F%2Fvn.freepik.com%2Fbieu-tuong%2Fuser-avatar_3607444&psig=AOvVaw2hHUerWc7n5En4-G02AokN&ust=1761747169655000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCJiNmOuJx5ADFQAAAAAdAAAAABAE',
-              ),
+              backgroundColor: Color(0xFF7C4DFF),
+              child: Icon(Icons.person, color: Colors.white, size: 20),
             ),
             offset: const Offset(
               0,
@@ -510,7 +510,12 @@ class _HomeScreenState extends State<HomeScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            // Navigate to room detail
+            // Navigate to room detail screen
+            Navigator.pushNamed(
+              context,
+              AppRoutes.roomDetail,
+              arguments: room.id,
+            );
           },
           child: Padding(
             padding: const EdgeInsets.all(12),
