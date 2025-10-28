@@ -6,6 +6,8 @@ import '../screens/rooms_screen.dart';
 import '../screens/room_detail_screen.dart';
 import '../screens/booking_screen.dart';
 import '../screens/create_booking_screen.dart';
+import '../screens/booking_detail_screen.dart';
+import '../screens/profile_screen.dart';
 
 class AppRoutes {
   // Tên các route
@@ -16,6 +18,8 @@ class AppRoutes {
   static const String roomDetail = '/room-detail';
   static const String booking = '/booking';
   static const String createBooking = '/create-booking';
+  static const String bookingDetail = '/booking-detail';
+  static const String profile = '/profile';
 
   // Map các route với màn hình tương ứng
   static Map<String, WidgetBuilder> getRoutes() {
@@ -24,6 +28,7 @@ class AppRoutes {
       login: (context) => const LoginScreen(),
       register: (context) => const RegisterScreen(),
       rooms: (context) => const RoomsScreen(),
+      profile: (context) => const ProfileScreen(),
     };
   }
 
@@ -64,6 +69,14 @@ class AppRoutes {
         // Không có arguments
         return MaterialPageRoute(
           builder: (context) => const CreateBookingScreen(),
+        );
+      case bookingDetail:
+        final bookingId = settings.arguments as String?;
+        if (bookingId == null) {
+          return null;
+        }
+        return MaterialPageRoute(
+          builder: (context) => BookingDetailScreen(bookingId: bookingId),
         );
       default:
         return null;

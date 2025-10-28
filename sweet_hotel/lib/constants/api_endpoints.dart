@@ -19,6 +19,12 @@ class ApiEndpoints {
 
   // Booking endpoints - trả về URL đầy đủ
   static const booking = _Booking();
+
+  // Review endpoints - trả về URL đầy đủ
+  static const review = _Review();
+
+  // User endpoints - trả về URL đầy đủ
+  static const user = _User();
 }
 
 // Auth endpoints
@@ -54,4 +60,19 @@ class _Booking {
   String byId(String id) => '${ApiEndpoints.baseUrl}/Bookings/$id';
   String myBookings(String userId) =>
       '${ApiEndpoints.baseUrl}/Bookings/MyBookings/$userId';
+  String cancel(String id) => '${ApiEndpoints.baseUrl}/Bookings/Cancel/$id';
+}
+
+// Review endpoints
+class _Review {
+  const _Review();
+  String get create => '${ApiEndpoints.baseUrl}/Reviews';
+  String byBooking(String bookingId) =>
+      '${ApiEndpoints.baseUrl}/Reviews/ByBooking/$bookingId';
+}
+
+// User endpoints
+class _User {
+  const _User();
+  String byId(String id) => '${ApiEndpoints.baseUrl}/User/$id';
 }

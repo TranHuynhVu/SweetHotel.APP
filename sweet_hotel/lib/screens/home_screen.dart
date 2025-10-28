@@ -132,6 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      // cấu trúc của một layout cơ bản trong Flutter
       backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
         elevation: 0,
@@ -145,7 +146,9 @@ class _HomeScreenState extends State<HomeScreen> {
           PopupMenuButton<String>(
             icon: const CircleAvatar(
               radius: 16,
-              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=5'),
+              backgroundImage: NetworkImage(
+                'https://www.google.com.vn/url?sa=i&url=https%3A%2F%2Fvn.freepik.com%2Fbieu-tuong%2Fuser-avatar_3607444&psig=AOvVaw2hHUerWc7n5En4-G02AokN&ust=1761747169655000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCJiNmOuJx5ADFQAAAAAdAAAAABAE',
+              ),
             ),
             offset: const Offset(
               0,
@@ -291,6 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
               break;
             case 3:
               // Navigate to Profile
+              Navigator.pushNamed(context, '/profile');
               break;
           }
         },

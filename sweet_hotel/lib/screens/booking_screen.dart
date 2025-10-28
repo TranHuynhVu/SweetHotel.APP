@@ -1,9 +1,13 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/booking.dart';
+import '../models/review.dart';
 import '../services/booking_service.dart';
+import '../services/review_service.dart';
 import '../constants/app_colors.dart';
 import '../widgets/custom_bottom_nav.dart';
+import '../widgets/review_form_dialog.dart';
+import 'booking_detail_screen.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({Key? key}) : super(key: key);
@@ -12,15 +16,25 @@ class BookingScreen extends StatefulWidget {
   State<BookingScreen> createState() => _BookingScreenState();
 }
 
-class _BookingScreenState extends State<BookingScreen> {
+class _BookingScreenState extends State<BookingScreen>
+    with SingleTickerProviderStateMixin {
   final BookingService _bookingService = BookingService();
-  List<Booking> _myBookings = [];
+  final ReviewService _reviewService = ReviewService();
+  MyBookingsResponse? _bookingsResponse;
   bool _isLoading = false;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 5, vsync: this);
     _loadMyBookings();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadMyBookings() async {
@@ -30,7 +44,7 @@ class _BookingScreenState extends State<BookingScreen> {
     try {
       final bookings = await _bookingService.getMyBookings();
       setState(() {
-        _myBookings = bookings;
+        _bookingsResponse = bookings;
         _isLoading = false;
       });
     } catch (e) {
@@ -84,6 +98,36 @@ class _BookingScreenState extends State<BookingScreen> {
     }
   }
 
+  Future<void> _showReviewDialog(String bookingId) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => ReviewFormDialog(
+        bookingId: bookingId,
+        onSubmit: (request) async {
+          await _reviewService.createReview(request);
+        },
+      ),
+    );
+
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cảm ơn bạn đã đánh giá!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  void _viewBookingDetail(String bookingId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BookingDetailScreen(bookingId: bookingId),
+      ),
+    );
+  }
+
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
@@ -97,8 +141,163 @@ class _BookingScreenState extends State<BookingScreen> {
         title: const Text('Phòng đã đặt'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          indicatorColor: Colors.white,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          tabs: [
+            Tab(
+              child: Row(
+                children: [
+                  const Text('Tất cả'),
+                  if (_bookingsResponse != null)
+                    Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${_bookingsResponse!.all.length}',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                children: [
+                  const Text('Sắp tới'),
+                  if (_bookingsResponse != null)
+                    Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${_bookingsResponse!.upcoming.length}',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                children: [
+                  const Text('Hiện tại'),
+                  if (_bookingsResponse != null)
+                    Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${_bookingsResponse!.current.length}',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                children: [
+                  const Text('Hoàn thành'),
+                  if (_bookingsResponse != null)
+                    Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${_bookingsResponse!.completed.length}',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                children: [
+                  const Text('Đã hủy'),
+                  if (_bookingsResponse != null)
+                    Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${_bookingsResponse!.cancelled.length}',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      body: _buildBookingsList(),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildBookingsList(_bookingsResponse?.all ?? []),
+                _buildBookingsList(_bookingsResponse?.upcoming ?? []),
+                _buildBookingsList(_bookingsResponse?.current ?? []),
+                _buildBookingsList(_bookingsResponse?.completed ?? []),
+                _buildBookingsList(_bookingsResponse?.cancelled ?? []),
+              ],
+            ),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: 1,
         onTap: (index) {
@@ -106,15 +305,16 @@ class _BookingScreenState extends State<BookingScreen> {
             Navigator.pushReplacementNamed(context, '/home');
           } else if (index == 2) {
             Navigator.pushReplacementNamed(context, '/rooms');
+          } else if (index == 3) {
+            Navigator.pushReplacementNamed(context, '/profile');
           }
         },
       ),
     );
   }
 
-  Widget _buildBookingsList() {
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
-    if (_myBookings.isEmpty) {
+  Widget _buildBookingsList(List<Booking> bookings) {
+    if (bookings.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -166,14 +366,14 @@ class _BookingScreenState extends State<BookingScreen> {
       color: AppColors.primary,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: _myBookings.length,
-        itemBuilder: (context, index) => _buildBookingCard(_myBookings[index]),
+        itemCount: bookings.length,
+        itemBuilder: (context, index) => _buildBookingCard(bookings[index]),
       ),
     );
   }
 
   Widget _buildBookingCard(Booking booking) {
-    final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '');
+    final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
     Color statusColor;
     IconData statusIcon;
     switch (booking.status.toLowerCase()) {
@@ -257,6 +457,21 @@ class _BookingScreenState extends State<BookingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Hiển thị thông tin phòng nếu có
+                if (booking.room != null) ...[
+                  _buildBookingInfoRow(
+                    Icons.hotel,
+                    'Loại phòng',
+                    booking.room!.categoryName,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildBookingInfoRow(
+                    Icons.local_offer,
+                    'Giá phòng',
+                    '${currencyFormat.format(booking.room!.price)} (-${booking.room!.discount}%)',
+                  ),
+                  const Divider(height: 24),
+                ],
                 _buildBookingInfoRow(
                   Icons.event,
                   'Check-in',
@@ -305,6 +520,46 @@ class _BookingScreenState extends State<BookingScreen> {
                     ),
                   ),
                 ),
+              ),
+            ),
+          // Buttons for Completed status
+          if (booking.isCompleted)
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _viewBookingDetail(booking.id),
+                      icon: const Icon(Icons.info_outline),
+                      label: const Text('Xem chi tiết'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showReviewDialog(booking.id),
+                      icon: const Icon(Icons.star_outline),
+                      label: const Text('Đánh giá'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
         ],

@@ -207,6 +207,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
               break;
             case 3:
               // Navigate to Profile
+              Navigator.pushNamed(context, '/profile');
               break;
           }
         },

@@ -22,7 +22,7 @@ class BookingService {
   }
 
   /// Lấy danh sách tất cả bookings của user hiện tại
-  Future<List<Booking>> getMyBookings() async {
+  Future<MyBookingsResponse> getMyBookings() async {
     try {
       // Lấy userId từ AuthService
       final userId = await _authService.getUserId();
@@ -34,8 +34,9 @@ class BookingService {
         ApiEndpoints.booking.myBookings(userId),
       );
 
-      if (response is List) {
-        return response.map((json) => Booking.fromJson(json)).toList();
+      // Response là object với các key: upcoming, current, completed, cancelled, all
+      if (response is Map<String, dynamic>) {
+        return MyBookingsResponse.fromJson(response);
       }
 
       throw Exception('Invalid response format');
@@ -57,9 +58,19 @@ class BookingService {
   /// Hủy booking
   Future<void> cancelBooking(String id) async {
     try {
-      await _apiService.delete(ApiEndpoints.booking.byId(id));
+      await _apiService.post(ApiEndpoints.booking.cancel(id), {});
     } catch (e) {
       throw Exception('Failed to cancel booking: $e');
+    }
+  }
+
+  /// Lấy chi tiết booking theo ID
+  Future<Booking> getBookingDetail(String id) async {
+    try {
+      final response = await _apiService.get(ApiEndpoints.booking.byId(id));
+      return Booking.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to load booking detail: $e');
     }
   }
 }
