@@ -38,12 +38,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   Future<void> _loadCurrentUserId() async {
     try {
       final userId = await _authService.getUserId();
-      print('🔍 DEBUG - Current User ID loaded: $userId');
       setState(() {
         _currentUserId = userId;
       });
     } catch (e) {
-      print('❌ DEBUG - Error loading user ID: $e');
+      // Ignore error
     }
   }
 
@@ -315,14 +314,18 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   Widget _buildReviewCard(Review review) {
+    // Cách 1: So sánh với userId trong review (nếu API trả về)
+    // Cách 2: So sánh với userId của booking owner
     final bool isOwnReview =
         _currentUserId != null &&
-        review.userId != null &&
-        review.userId == _currentUserId;
+        ((review.userId != null && review.userId == _currentUserId) ||
+            (_booking?.user?.id != null &&
+                _booking!.user!.id == _currentUserId));
 
     print('🔍 DEBUG Review Card:');
     print('   - Review ID: ${review.id}');
     print('   - Review User ID: ${review.userId}');
+    print('   - Booking User ID: ${_booking?.user?.id}');
     print('   - Current User ID: $_currentUserId');
     print('   - Is Own Review: $isOwnReview');
     print('   ---');

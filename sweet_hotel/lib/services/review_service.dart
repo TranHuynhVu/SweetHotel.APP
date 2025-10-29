@@ -39,14 +39,18 @@ class ReviewService {
   /// Xóa review
   Future<void> deleteReview(String reviewId) async {
     try {
-      await _apiService.delete(ApiEndpoints.review.delete(reviewId));
+      // API sử dụng POST method cho Delete endpoint
+      await _apiService.post(
+        ApiEndpoints.review.delete(reviewId),
+        {}, // Empty body
+      );
     } catch (e) {
       throw Exception('Failed to delete review: $e');
     }
   }
 
   /// Cập nhật review
-  Future<Review> updateReview(
+  Future<Review?> updateReview(
     String reviewId,
     UpdateReviewRequest request,
   ) async {
@@ -55,6 +59,11 @@ class ReviewService {
         ApiEndpoints.review.update(reviewId),
         request.toJson(),
       );
+
+      // Nếu response là null (204 No Content), trả về null
+      if (response == null) {
+        return null;
+      }
 
       return Review.fromJson(response);
     } catch (e) {
