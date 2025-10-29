@@ -85,6 +85,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.pushNamed(context, '/edit-profile').then((_) {
+                // Reload user info sau khi quay lại từ edit screen
+                _loadUserInfo();
+              });
+            },
+            tooltip: 'Chỉnh sửa',
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _logout,
             tooltip: 'Đăng xuất',

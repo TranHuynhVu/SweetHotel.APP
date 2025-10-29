@@ -57,6 +57,7 @@ class Booking {
   final String userId;
   final BookingRoomInfo? room;
   final BookingUserInfo? user;
+  final bool hasReview;
 
   Booking({
     required this.id,
@@ -69,6 +70,7 @@ class Booking {
     required this.userId,
     this.room,
     this.user,
+    this.hasReview = false,
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) {
@@ -91,6 +93,7 @@ class Booking {
       user: json['user'] != null
           ? BookingUserInfo.fromJson(json['user'])
           : null,
+      hasReview: json['hasReview'] ?? false,
     );
   }
 

@@ -8,6 +8,7 @@ import '../screens/booking_screen.dart';
 import '../screens/create_booking_screen.dart';
 import '../screens/booking_detail_screen.dart';
 import '../screens/profile_screen.dart';
+import '../screens/edit_profile_screen.dart';
 
 class AppRoutes {
   // Tên các route
@@ -20,6 +21,7 @@ class AppRoutes {
   static const String createBooking = '/create-booking';
   static const String bookingDetail = '/booking-detail';
   static const String profile = '/profile';
+  static const String editProfile = '/edit-profile';
 
   // Map các route với màn hình tương ứng
   static Map<String, WidgetBuilder> getRoutes() {
@@ -29,6 +31,7 @@ class AppRoutes {
       register: (context) => const RegisterScreen(),
       rooms: (context) => const RoomsScreen(),
       profile: (context) => const ProfileScreen(),
+      editProfile: (context) => const EditProfileScreen(),
     };
   }
 

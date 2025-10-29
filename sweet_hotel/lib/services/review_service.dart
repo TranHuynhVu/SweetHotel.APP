@@ -35,4 +35,30 @@ class ReviewService {
       throw Exception('Failed to load reviews: $e');
     }
   }
+
+  /// Xóa review
+  Future<void> deleteReview(String reviewId) async {
+    try {
+      await _apiService.delete(ApiEndpoints.review.delete(reviewId));
+    } catch (e) {
+      throw Exception('Failed to delete review: $e');
+    }
+  }
+
+  /// Cập nhật review
+  Future<Review> updateReview(
+    String reviewId,
+    UpdateReviewRequest request,
+  ) async {
+    try {
+      final response = await _apiService.post(
+        ApiEndpoints.review.update(reviewId),
+        request.toJson(),
+      );
+
+      return Review.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to update review: $e');
+    }
+  }
 }

@@ -4,7 +4,9 @@ import '../models/booking.dart';
 import '../models/review.dart';
 import '../services/booking_service.dart';
 import '../services/review_service.dart';
+import '../services/auth_service.dart';
 import '../constants/app_colors.dart';
+import '../widgets/review_form_dialog.dart';
 
 class BookingDetailScreen extends StatefulWidget {
   final String bookingId;
@@ -19,15 +21,30 @@ class BookingDetailScreen extends StatefulWidget {
 class _BookingDetailScreenState extends State<BookingDetailScreen> {
   final BookingService _bookingService = BookingService();
   final ReviewService _reviewService = ReviewService();
+  final AuthService _authService = AuthService();
 
   Booking? _booking;
   List<Review> _reviews = [];
   bool _isLoading = false;
+  String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _loadCurrentUserId();
+  }
+
+  Future<void> _loadCurrentUserId() async {
+    try {
+      final userId = await _authService.getUserId();
+      print('🔍 DEBUG - Current User ID loaded: $userId');
+      setState(() {
+        _currentUserId = userId;
+      });
+    } catch (e) {
+      print('❌ DEBUG - Error loading user ID: $e');
+    }
   }
 
   Future<void> _loadData() async {
@@ -298,6 +315,18 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   Widget _buildReviewCard(Review review) {
+    final bool isOwnReview =
+        _currentUserId != null &&
+        review.userId != null &&
+        review.userId == _currentUserId;
+
+    print('🔍 DEBUG Review Card:');
+    print('   - Review ID: ${review.id}');
+    print('   - Review User ID: ${review.userId}');
+    print('   - Current User ID: $_currentUserId');
+    print('   - Is Own Review: $isOwnReview');
+    print('   ---');
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -311,28 +340,163 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         children: [
           Row(
             children: [
-              ...List.generate(5, (index) {
-                return Icon(
-                  index < review.rating
-                      ? Icons.star_rounded
-                      : Icons.star_outline_rounded,
-                  color: index < review.rating ? Colors.amber : Colors.grey,
-                  size: 20,
-                );
-              }),
-              const SizedBox(width: 8),
-              Text(
-                DateFormat('dd/MM/yyyy').format(review.createdAt),
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        ...List.generate(5, (index) {
+                          return Icon(
+                            index < review.rating
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
+                            color: index < review.rating
+                                ? Colors.amber
+                                : Colors.grey,
+                            size: 20,
+                          );
+                        }),
+                        const SizedBox(width: 8),
+                        Text(
+                          DateFormat('dd/MM/yyyy').format(review.createdAt),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      review.comment,
+                      style: const TextStyle(fontSize: 14, height: 1.5),
+                    ),
+                  ],
+                ),
               ),
+              if (isOwnReview) ...[
+                const SizedBox(width: 8),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.edit,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                      onPressed: () => _editReview(review),
+                      tooltip: 'Chỉnh sửa',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(height: 8),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                        size: 20,
+                      ),
+                      onPressed: () => _deleteReview(review),
+                      tooltip: 'Xóa',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            review.comment,
-            style: const TextStyle(fontSize: 14, height: 1.5),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteReview(Review review) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Xác nhận xóa'),
+        content: const Text('Bạn có chắc chắn muốn xóa đánh giá này?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Xóa'),
           ),
         ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await _reviewService.deleteReview(review.id);
+
+        // Reload reviews
+        await _loadData();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã xóa đánh giá thành công'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _editReview(Review review) async {
+    await showDialog(
+      context: context,
+      builder: (context) => ReviewFormDialog(
+        bookingId: widget.bookingId,
+        existingReview: review,
+        onSubmit: (request) async {
+          // Not used in edit mode, but required parameter
+        },
+        onUpdate: (reviewId, request) async {
+          try {
+            await _reviewService.updateReview(reviewId, request);
+
+            // Reload reviews
+            await _loadData();
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Đã cập nhật đánh giá thành công'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Lỗi: ${e.toString()}'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
       ),
     );
   }

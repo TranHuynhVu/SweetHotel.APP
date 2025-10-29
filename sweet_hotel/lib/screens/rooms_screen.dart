@@ -150,21 +150,45 @@ class _RoomsScreenState extends State<RoomsScreen> {
 
   /// Show date picker
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
+    if (isStartDate) {
+      // Chọn ngày nhận phòng
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: _startDate ?? DateTime.now(),
+        firstDate: DateTime.now(),
+        lastDate: DateTime.now().add(const Duration(days: 365)),
+      );
 
-    if (picked != null) {
-      setState(() {
-        if (isStartDate) {
+      if (picked != null) {
+        setState(() {
           _startDate = picked;
-        } else {
+          // Nếu ngày trả phòng <= ngày nhận phòng, reset ngày trả phòng
+          if (_endDate != null && !_endDate!.isAfter(_startDate!)) {
+            _endDate = null;
+          }
+        });
+      }
+    } else {
+      // Chọn ngày trả phòng
+      if (_startDate == null) {
+        _showError('Vui lòng chọn ngày nhận phòng trước');
+        return;
+      }
+
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: _endDate ?? _startDate!.add(const Duration(days: 1)),
+        firstDate: _startDate!.add(
+          const Duration(days: 1),
+        ), // Ít nhất 1 ngày sau startDate
+        lastDate: DateTime.now().add(const Duration(days: 365)),
+      );
+
+      if (picked != null) {
+        setState(() {
           _endDate = picked;
-        }
-      });
+        });
+      }
     }
   }
 
@@ -181,14 +205,17 @@ class _RoomsScreenState extends State<RoomsScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: Column(
-        children: [
-          // Filter section
-          _buildFilterSection(),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          children: [
+            // Filter section - Now scrollable
+            Flexible(flex: 0, child: _buildFilterSection()),
 
-          // Rooms list
-          Expanded(child: _buildRoomsList()),
-        ],
+            // Rooms list
+            Expanded(child: _buildRoomsList()),
+          ],
+        ),
       ),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: 2,
@@ -217,176 +244,187 @@ class _RoomsScreenState extends State<RoomsScreen> {
 
   Widget _buildFilterSection() {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            spreadRadius: 0,
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
+      constraints: BoxConstraints(
+        maxHeight:
+            MediaQuery.of(context).size.height *
+            0.6, // Max 60% of screen height
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () {
-              setState(() {
-                _isFilterExpanded = !_isFilterExpanded;
-              });
-            },
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.filter_list_rounded,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Text(
-                    'Lọc Phòng',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                // Hiển thị số lượng filter đang áp dụng
-                if (!_isFilterExpanded &&
-                    (_startDate != null ||
-                        _selectedCategoryId != null ||
-                        _maxPeople != null))
-                  Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${[_startDate, _endDate, _selectedCategoryId, _maxPeople].where((e) => e != null).length}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                Icon(
-                  _isFilterExpanded
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.keyboard_arrow_down_rounded,
-                  color: Colors.grey[600],
-                  size: 24,
-                ),
-              ],
-            ),
+      child: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                spreadRadius: 0,
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-
-          // Animated filter content
-          AnimatedCrossFade(
-            firstChild: const SizedBox.shrink(),
-            secondChild: Column(
-              children: [
-                const SizedBox(height: 20),
-
-                // Date range - Full width for each date
-                _buildDateField(
-                  label: 'Ngày nhận phòng',
-                  date: _startDate,
-                  onTap: () => _selectDate(context, true),
-                  icon: Icons.event_rounded,
-                ),
-                const SizedBox(height: 12),
-                _buildDateField(
-                  label: 'Ngày trả phòng',
-                  date: _endDate,
-                  onTap: () => _selectDate(context, false),
-                  icon: Icons.event_available_rounded,
-                ),
-                const SizedBox(height: 16),
-
-                // Category dropdown - Full width
-                _buildCategoryDropdown(),
-                const SizedBox(height: 12),
-
-                // Max people - Full width
-                _buildMaxPeopleField(),
-                const SizedBox(height: 20),
-
-                // Action buttons
-                Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    _isFilterExpanded = !_isFilterExpanded;
+                  });
+                },
+                child: Row(
                   children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _applyFilters,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 2,
-                        ),
-                        icon: const Icon(Icons.search_rounded, size: 20),
-                        label: const Text(
-                          'Tìm kiếm',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.filter_list_rounded,
+                        color: AppColors.primary,
+                        size: 20,
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _clearFilters,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: BorderSide(
-                            color: AppColors.primary.withOpacity(0.5),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        icon: const Icon(Icons.refresh_rounded, size: 20),
-                        label: const Text(
-                          'Xóa lọc',
-                          style: TextStyle(fontWeight: FontWeight.w600),
+                    const Expanded(
+                      child: Text(
+                        'Lọc Phòng',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
                     ),
+                    // Hiển thị số lượng filter đang áp dụng
+                    if (!_isFilterExpanded &&
+                        (_startDate != null ||
+                            _selectedCategoryId != null ||
+                            _maxPeople != null))
+                      Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${[_startDate, _endDate, _selectedCategoryId, _maxPeople].where((e) => e != null).length}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    Icon(
+                      _isFilterExpanded
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded,
+                      color: Colors.grey[600],
+                      size: 24,
+                    ),
                   ],
                 ),
-              ],
-            ),
-            crossFadeState: _isFilterExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 300),
+              ),
+
+              // Animated filter content
+              AnimatedCrossFade(
+                firstChild: const SizedBox.shrink(),
+                secondChild: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 20),
+
+                    // Date range - Full width for each date
+                    _buildDateField(
+                      label: 'Ngày nhận phòng',
+                      date: _startDate,
+                      onTap: () => _selectDate(context, true),
+                      icon: Icons.event_rounded,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDateField(
+                      label: 'Ngày trả phòng',
+                      date: _endDate,
+                      onTap: () => _selectDate(context, false),
+                      icon: Icons.event_available_rounded,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Category dropdown - Full width
+                    _buildCategoryDropdown(),
+                    const SizedBox(height: 12),
+
+                    // Max people - Full width
+                    _buildMaxPeopleField(),
+                    const SizedBox(height: 20),
+
+                    // Action buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _applyFilters,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 2,
+                            ),
+                            icon: const Icon(Icons.search_rounded, size: 20),
+                            label: const Text(
+                              'Tìm kiếm',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _clearFilters,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: BorderSide(
+                                color: AppColors.primary.withOpacity(0.5),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: const Icon(Icons.refresh_rounded, size: 20),
+                            label: const Text(
+                              'Xóa lọc',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                crossFadeState: _isFilterExpanded
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 300),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -509,6 +547,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
     return TextField(
       controller: _maxPeopleController,
       keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.done,
       decoration: InputDecoration(
         labelText: 'Số người',
         labelStyle: TextStyle(
@@ -545,6 +584,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
           _maxPeople = int.tryParse(value);
         });
       },
+      onSubmitted: (_) => FocusScope.of(context).unfocus(),
     );
   }
 

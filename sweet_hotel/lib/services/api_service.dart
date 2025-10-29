@@ -63,6 +63,9 @@ class ApiService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return json.decode(response.body);
+      } else if (response.statusCode == 204) {
+        // No Content - success but no response body
+        return null;
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized. Please login again.');
       } else {
@@ -103,7 +106,11 @@ class ApiService {
 
       final response = await _interceptor.request(method: 'DELETE', url: uri);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // 204 No Content is also success
+        if (response.body.isEmpty) {
+          return null;
+        }
         return json.decode(response.body);
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized. Please login again.');

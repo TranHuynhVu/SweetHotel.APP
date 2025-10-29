@@ -69,10 +69,19 @@ class _Review {
   String get create => '${ApiEndpoints.baseUrl}/Reviews';
   String byBooking(String bookingId) =>
       '${ApiEndpoints.baseUrl}/Reviews/ByBooking/$bookingId';
+  String delete(String reviewId) =>
+      '${ApiEndpoints.baseUrl}/Reviews/Delete/$reviewId';
+  String update(String reviewId) =>
+      '${ApiEndpoints.baseUrl}/Reviews/Update/$reviewId';
 }
 
 // User endpoints
 class _User {
   const _User();
   String byId(String id) => '${ApiEndpoints.baseUrl}/User/$id';
+  String uploadAvatar(String id) =>
+      '${ApiEndpoints.baseUrl}/User/$id/UploadAvatar';
+  String changePassword(String id) =>
+      '${ApiEndpoints.baseUrl}/User/$id/ChangePassword';
+  String update(String id) => '${ApiEndpoints.baseUrl}/User/Update/$id';
 }

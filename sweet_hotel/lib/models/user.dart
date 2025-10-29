@@ -3,6 +3,7 @@ class User {
   final String email;
   final String fullName;
   final String avatar;
+  final String? phoneNumber;
   final List<String> roles;
 
   User({
@@ -10,6 +11,7 @@ class User {
     required this.email,
     required this.fullName,
     required this.avatar,
+    this.phoneNumber,
     required this.roles,
   });
 
@@ -19,6 +21,7 @@ class User {
       email: json['email'] ?? '',
       fullName: json['fullName'] ?? '',
       avatar: json['avatar'] ?? '',
+      phoneNumber: json['phoneNumber'],
       roles:
           (json['roles'] as List<dynamic>?)
               ?.map((role) => role.toString())
@@ -33,6 +36,7 @@ class User {
       'email': email,
       'fullName': fullName,
       'avatar': avatar,
+      'phoneNumber': phoneNumber,
       'roles': roles,
     };
   }

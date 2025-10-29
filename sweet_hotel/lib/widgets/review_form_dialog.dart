@@ -3,12 +3,16 @@ import '../models/review.dart';
 
 class ReviewFormDialog extends StatefulWidget {
   final String bookingId;
+  final Review? existingReview; // null = create, not null = update
   final Function(CreateReviewRequest) onSubmit;
+  final Function(String reviewId, UpdateReviewRequest)? onUpdate;
 
   const ReviewFormDialog({
     Key? key,
     required this.bookingId,
+    this.existingReview,
     required this.onSubmit,
+    this.onUpdate,
   }) : super(key: key);
 
   @override
@@ -20,6 +24,17 @@ class _ReviewFormDialogState extends State<ReviewFormDialog> {
   final _commentController = TextEditingController();
   int _rating = 5;
   bool _isSubmitting = false;
+
+  bool get isEditMode => widget.existingReview != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (isEditMode) {
+      _rating = widget.existingReview!.rating;
+      _commentController.text = widget.existingReview!.comment;
+    }
+  }
 
   @override
   void dispose() {
@@ -33,13 +48,22 @@ class _ReviewFormDialogState extends State<ReviewFormDialog> {
     setState(() => _isSubmitting = true);
 
     try {
-      final request = CreateReviewRequest(
-        rating: _rating,
-        comment: _commentController.text.trim(),
-        bookingId: widget.bookingId,
-      );
-
-      await widget.onSubmit(request);
+      if (isEditMode) {
+        // Update existing review
+        final updateRequest = UpdateReviewRequest(
+          rating: _rating,
+          comment: _commentController.text.trim(),
+        );
+        await widget.onUpdate!(widget.existingReview!.id, updateRequest);
+      } else {
+        // Create new review
+        final createRequest = CreateReviewRequest(
+          rating: _rating,
+          comment: _commentController.text.trim(),
+          bookingId: widget.bookingId,
+        );
+        await widget.onSubmit(createRequest);
+      }
 
       if (mounted) {
         Navigator.pop(context, true); // Return true on success
@@ -86,21 +110,26 @@ class _ReviewFormDialogState extends State<ReviewFormDialog> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Đánh giá',
-                            style: TextStyle(
+                            isEditMode ? 'Chỉnh sửa đánh giá' : 'Đánh giá',
+                            style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            'Chia sẻ trải nghiệm của bạn',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                            isEditMode
+                                ? 'Cập nhật trải nghiệm của bạn'
+                                : 'Chia sẻ trải nghiệm của bạn',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
                           ),
                         ],
                       ),
@@ -234,9 +263,9 @@ class _ReviewFormDialogState extends State<ReviewFormDialog> {
                                   ),
                                 ),
                               )
-                            : const Text(
-                                'Gửi đánh giá',
-                                style: TextStyle(fontSize: 16),
+                            : Text(
+                                isEditMode ? 'Cập nhật' : 'Gửi đánh giá',
+                                style: const TextStyle(fontSize: 16),
                               ),
                       ),
                     ),

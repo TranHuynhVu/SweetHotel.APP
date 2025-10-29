@@ -98,8 +98,8 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
     if (picked != null) {
       setState(() {
         _startDate = picked;
-        // Reset end date nếu nó trước start date
-        if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+        // Reset end date nếu nó <= start date
+        if (_endDate != null && !_endDate!.isAfter(_startDate!)) {
           _endDate = null;
         }
         // Reset available rooms khi thay đổi ngày
@@ -117,7 +117,9 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _endDate ?? _startDate!.add(const Duration(days: 1)),
-      firstDate: _startDate!.add(const Duration(days: 1)),
+      firstDate: _startDate!.add(
+        const Duration(days: 1),
+      ), // Ít nhất 1 ngày sau startDate
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (context, child) {
         return Theme(
@@ -294,29 +296,36 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
           children: [
             Icon(Icons.check_circle, color: Colors.green, size: 32),
             const SizedBox(width: 12),
-            const Text('Đặt phòng thành công'),
+            const Expanded(
+              child: Text(
+                'Đặt phòng thành công',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoRow('Mã đặt phòng:', booking.id.substring(0, 8)),
-            _buildInfoRow(
-              'Ngày đến:',
-              DateFormat('dd/MM/yyyy').format(booking.startDate),
-            ),
-            _buildInfoRow(
-              'Ngày đi:',
-              DateFormat('dd/MM/yyyy').format(booking.endDate),
-            ),
-            _buildInfoRow('Số đêm:', '${booking.numberOfNights} đêm'),
-            _buildInfoRow(
-              'Tổng tiền:',
-              currencyFormat.format(booking.totalPrice),
-            ),
-            _buildInfoRow('Trạng thái:', booking.status),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildInfoRow('Mã đặt phòng:', booking.id.substring(0, 8)),
+              _buildInfoRow(
+                'Ngày đến:',
+                DateFormat('dd/MM/yyyy').format(booking.startDate),
+              ),
+              _buildInfoRow(
+                'Ngày đi:',
+                DateFormat('dd/MM/yyyy').format(booking.endDate),
+              ),
+              _buildInfoRow('Số đêm:', '${booking.numberOfNights} đêm'),
+              _buildInfoRow(
+                'Tổng tiền:',
+                currencyFormat.format(booking.totalPrice),
+              ),
+              _buildInfoRow('Trạng thái:', booking.status),
+            ],
+          ),
         ),
         actions: [
           TextButton(

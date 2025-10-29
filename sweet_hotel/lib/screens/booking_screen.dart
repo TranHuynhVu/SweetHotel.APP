@@ -1,7 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/booking.dart';
-import '../models/review.dart';
 import '../services/booking_service.dart';
 import '../services/review_service.dart';
 import '../constants/app_colors.dart';
@@ -37,6 +36,7 @@ class _BookingScreenState extends State<BookingScreen>
     super.dispose();
   }
 
+  /// Load danh sách đặt phòng của người dùng
   Future<void> _loadMyBookings() async {
     setState(() {
       _isLoading = true;
@@ -546,11 +546,19 @@ class _BookingScreenState extends State<BookingScreen>
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () => _showReviewDialog(booking.id),
-                      icon: const Icon(Icons.star_outline),
-                      label: const Text('Đánh giá'),
+                      onPressed: booking.hasReview
+                          ? null
+                          : () => _showReviewDialog(booking.id),
+                      icon: Icon(
+                        booking.hasReview ? Icons.star : Icons.star_outline,
+                      ),
+                      label: Text(
+                        booking.hasReview ? 'Đã đánh giá' : 'Đánh giá',
+                      ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
+                        backgroundColor: booking.hasReview
+                            ? Colors.grey
+                            : Colors.orange,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
